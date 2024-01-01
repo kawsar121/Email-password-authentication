@@ -28,7 +28,7 @@ const Header = () => {
                 </ul>
             </div>
             <div className="navbar-end">
-                <select className="select select-info w-[25%] max-w-xs">
+                <select className="select select-info w-[35%] max-w-xs">
                     <option disabled selected>language</option>
                     <option>English</option>
                     <option>Japanese</option>
