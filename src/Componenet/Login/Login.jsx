@@ -1,4 +1,6 @@
 import React from 'react';
+import { getAuth, createUserWithEmailAndPassword, applyActionCode } from "firebase/auth";
+import app from '../../Firebase/firebase.config';
 
 const Login = () => {
 
@@ -8,6 +10,14 @@ const handleLogin = e => {
     const email = e.target.email.value;
     const password = e.target.password.value;
     console.log(email, password);
+    const auth = getAuth(app)
+    createUserWithEmailAndPassword(auth, email, password)
+    .then(result =>{
+        console.log(result.user)
+    })
+    .catch(error =>{
+        console.log(error)
+    })
 }
 
 
