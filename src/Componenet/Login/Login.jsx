@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
-import { getAuth, createUserWithEmailAndPassword, applyActionCode } from "firebase/auth";
+import React, { useRef, useState } from 'react';
+import { getAuth, sendEmailVerification, sendPasswordResetEmail, signInWithEmailAndPassword } from "firebase/auth";
 import app from '../../Firebase/firebase.config';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 
 const Login = () => {
     const [logins, setlogins] = useState(''); // eta error er jonno korsi
     const [success, setSuccess] = useState('');
     const [showPassword, setShowPassword] = useState('false');
+    const emailRef = useRef(null)
 
 const handleLogin = e => {
     e.preventDefault();
@@ -31,10 +33,15 @@ const handleLogin = e => {
 
     // creat user
     const auth = getAuth(app)
-    createUserWithEmailAndPassword(auth, email, password)
+    signInWithEmailAndPassword(auth, email, password)
     .then(result =>{
         console.log(result.user)
-        setSuccess('user created successfully')
+        if(result.user.emailVerified){
+            setSuccess('Loged in successfully')
+        }
+        else{
+            alert('please verifiye your email')
+        }
     })
     .catch(error =>{
         console.log(error)
@@ -42,14 +49,34 @@ const handleLogin = e => {
     })
 }
 
+    const handleForgetpassword = e =>{
+        const email = emailRef.current.value;
+        if(!email){
+            console.log('Please provide an email', emailRef.current.value)
+            return;
+        }
+        else if(!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)){
+            console.log('plese write a valid email')
+            return;
+        }
+        const auth = getAuth(app)
+        sendPasswordResetEmail(auth, email)
+        .then(()=>{
+            alert('please cheek your email')
+        })
+        .catch(error =>{
+            console.log(error)
+        })
+    }
 
     return (
         <div>
-            <h1 className='text-xl'>This is login page</h1>
+            <h1 className='text-4xl mt-20 text-red-500'>Login Your Page</h1>
             <form onSubmit={handleLogin} className="max-w-sm mx-auto mt-6">
                 <div className="mb-5">
                     <input 
-                        type= 'email' 
+                        type= 'email'
+                        ref={emailRef} 
                         id="email" 
                         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
                         placeholder="Email Adress" 
@@ -57,18 +84,23 @@ const handleLogin = e => {
                         required />
                         
                 </div>
-                <div className="mb-5">
+                <div className="relative mb-5">
                     <input 
                     type={showPassword ? "text" : "password"} 
                     id="password" 
                     name="password" 
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500  w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
                     placeholder="Password" 
                     required />
-
-                        <span className='ml-80' onClick={ () => setShowPassword(!showPassword)}>
+                        <span className='absolute   mt-3 right-2' onClick={ () => setShowPassword(!showPassword)}>
                             {showPassword? <FaEye></FaEye>:<FaEyeSlash></FaEyeSlash>}
                         </span>
+
+                    <label className='label'>
+                        <a onClick={handleForgetpassword} href="#" className='label-text-alt link link-hover'>
+                            Forget password?
+                        </a>
+                    </label>
 
                 </div>
                 <div className="flex items-start mb-5">
@@ -90,6 +122,9 @@ const handleLogin = e => {
             {
                 success && <p className='mt-7 text-xl text-green-700'>{success}</p>
             }
+
+                <p className='mt-1'>New to website? <Link to='/register'><span className='text-yellow-400'>please register</span></Link> </p>
+
         </div>
     );
 };
